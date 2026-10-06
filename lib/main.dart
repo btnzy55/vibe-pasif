@@ -15,6 +15,11 @@ void main() => runApp(
       useMaterial3: true,
       scaffoldBackgroundColor: bg,
       colorScheme: const ColorScheme.dark(primary: mint),
+      bottomAppBarTheme: const BottomAppBarThemeData(
+        color: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
     ),
     home: const Shell(),
   ),
@@ -43,7 +48,9 @@ class _ShellS extends State<Shell> {
       Icons.monitor_heart_rounded,
     ];
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
+        bottom: false,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: KeyedSubtree(key: ValueKey(i), child: pages[i]),
@@ -57,34 +64,68 @@ class _ShellS extends State<Shell> {
               child: const Icon(Icons.add),
             )
           : null,
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: card,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              for (var k = 0; k < 4; k++)
-                GestureDetector(
-                  onTap: () => setState(() => i = k),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i == k ? a(mint, .18) : Colors.transparent,
-                      border: Border.all(
-                        color: i == k ? mint : Colors.transparent,
+      bottomNavigationBar: Material(
+        color: Colors.transparent,
+        elevation: 0,
+        child: SafeArea(
+          child: Container(
+            height: 52,
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 18),
+            padding: const EdgeInsets.all(4),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: card,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: a(mint, .28)),
+            ),
+            child: LayoutBuilder(
+              builder: (_, box) {
+                final slot = box.maxWidth / 4;
+                const size = 40.0;
+                return Stack(
+                  children: [
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 380),
+                      curve: Curves.easeOutBack,
+                      left: i * slot + (slot - size) / 2,
+                      top: 2,
+                      child: Container(
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: a(mint, .18),
+                          border: Border.all(color: mint),
+                        ),
                       ),
                     ),
-                    child: Icon(ic[k], color: i == k ? mint : Colors.white38),
-                  ),
-                ),
-            ],
+                    Row(
+                      children: [
+                        for (var k = 0; k < 4; k++)
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => setState(() => i = k),
+                              child: Center(
+                                child: AnimatedScale(
+                                  duration: const Duration(milliseconds: 280),
+                                  curve: Curves.easeOutBack,
+                                  scale: i == k ? 1.12 : 1,
+                                  child: Icon(
+                                    ic[k],
+                                    size: 22,
+                                    color: i == k ? mint : Colors.white38,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

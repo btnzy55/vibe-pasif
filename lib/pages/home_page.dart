@@ -58,33 +58,38 @@ class _HomeS extends State<Home> {
           const SizedBox(height: 20),
           Row(
             children: [
-              for (var k = 0; k < 7; k++)
+              for (var k = 0; k < 7; k++) ...[
+                if (k > 0) const SizedBox(width: 6),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => sel = k),
                     child: Column(
                       children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: sel == k ? yel : card,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            children: [
-                              tx(
-                                dn[week[k].weekday - 1],
-                                11,
-                                c: sel == k ? bg : Colors.white54,
+                        tx(
+                          dn[week[k].weekday - 1],
+                          11,
+                          c: sel == k ? yel : Colors.white54,
+                        ),
+                        const SizedBox(height: 6),
+                        AspectRatio(
+                          aspectRatio: 1,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOutBack,
+                            decoration: BoxDecoration(
+                              color: sel == k ? yel : card,
+                              borderRadius: BorderRadius.circular(
+                                sel == k ? 16 : 10,
                               ),
-                              tx(
+                            ),
+                            child: Center(
+                              child: tx(
                                 '${week[k].day}',
                                 16,
                                 c: sel == k ? bg : Colors.white,
+                                w: FontWeight.w600,
                               ),
-                            ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -101,6 +106,7 @@ class _HomeS extends State<Home> {
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 14),
@@ -125,19 +131,7 @@ class _HomeS extends State<Home> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                TweenAnimationBuilder<double>(
-                  tween: Tween(end: cl(q / st.target)),
-                  duration: const Duration(milliseconds: 600),
-                  builder: (_, v, __) => ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: v,
-                      minHeight: 10,
-                      color: yel,
-                      backgroundColor: a(Colors.white, .08),
-                    ),
-                  ),
-                ),
+                _ProdBar(cl(q / st.target)),
               ],
             ),
           ),
@@ -236,6 +230,101 @@ class _HomeS extends State<Home> {
             onTap: () => widget.go(3),
           ),
         ],
+      );
+    },
+  );
+}
+
+class _ProdBar extends StatefulWidget {
+  final double value;
+
+  const _ProdBar(this.value);
+
+  @override
+  State<_ProdBar> createState() => _ProdBarS();
+}
+
+class _ProdBarS extends State<_ProdBar> with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  late Animation<double> _a;
+
+  Animation<double> _tween(double from, double to) => Tween(
+    begin: from,
+
+    end: to,
+  ).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOutCubic));
+
+  @override
+  void initState() {
+    super.initState();
+
+    _c = AnimationController(
+      vsync: this,
+
+      duration: const Duration(milliseconds: 520),
+    );
+
+    _a = _tween(0, widget.value);
+
+    _c.forward();
+  }
+
+  @override
+  void didUpdateWidget(_ProdBar old) {
+    super.didUpdateWidget(old);
+
+    if (old.value == widget.value) return;
+
+    _a = _tween(_a.value, widget.value);
+
+    _c
+      ..reset()
+      ..forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _a,
+
+    builder: (_, __) {
+      final v = cl(_a.value);
+
+      final col = v < .5
+          ? Color.lerp(org, yel, v * 2)!
+          : Color.lerp(yel, mint, (v - .5) * 2)!;
+
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+
+        child: SizedBox(
+          height: 10,
+
+          child: Stack(
+            fit: StackFit.expand,
+
+            children: [
+              ColoredBox(color: a(Colors.white, .08)),
+
+              Align(
+                alignment: Alignment.centerLeft,
+
+                child: FractionallySizedBox(
+                  widthFactor: v,
+
+                  child: ColoredBox(color: col),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     },
   );

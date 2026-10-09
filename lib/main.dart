@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import './theme.dart';
 import './pages/home_page.dart';
@@ -6,27 +7,40 @@ import './pages/prod_page.dart';
 import './pages/order_page.dart';
 import './pages/mach_page.dart';
 
-void main() => runApp(
-      MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'ProdTrack',
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          useMaterial3: true,
-          scaffoldBackgroundColor: bg,
-          colorScheme: const ColorScheme.dark(
-            primary: mint,
-            surface: card,
-          ),
-          bottomAppBarTheme: const BottomAppBarThemeData(
-            color: Colors.transparent,
-            elevation: 0,
-            surfaceTintColor: Colors.transparent,
-          ),
+Future<void> initBackendServices() async {
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase initialization status: $e');
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initBackendServices();
+
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'ProdTrack',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        useMaterial3: true,
+        scaffoldBackgroundColor: bg,
+        colorScheme: const ColorScheme.dark(
+          primary: mint,
+          surface: card,
         ),
-        home: const Shell(),
+        bottomAppBarTheme: const BottomAppBarThemeData(
+          color: Colors.transparent,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
-    );
+      home: const Shell(),
+    ),
+  );
+}
 
 class Shell extends StatefulWidget {
   const Shell({super.key});
@@ -187,4 +201,3 @@ class _ShellS extends State<Shell> {
     );
   }
 }
-
